@@ -25,6 +25,14 @@ This will **not** render overlays by itself, use something like [Browsingway](ht
 
 Install instructions can be found [here](https://www.iinact.com/installation/), but are indentical to any other 3rd-party plugin repository.
 
+For the Korean client, add this custom plugin repository to Dalamud instead:
+
+```
+https://raw.githubusercontent.com/aetherfl0w/IINACT_KR/main/repo.kr.json
+```
+
+Releases are built against the [dal4kr](https://github.com/dal4kr/Dalamud) Dalamud that fexiv installs.
+
 ## How to build
 
 Just run 

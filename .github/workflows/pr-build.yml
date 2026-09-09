@@ -10,18 +10,24 @@ jobs:
       DALAMUD_HOME: /tmp/dalamud
       DOTNET_NOLOGO: true
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         submodules: recursive
     - name: Setup .NET
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: 9.0.x
-    - name: Download Dalamud
+        dotnet-version: 10.0.x
+    - name: Download Dalamud (dal4kr)
       shell: pwsh
       run: |
-        Invoke-WebRequest -Uri https://goatcorp.github.io/dalamud-distrib/stg/latest.zip -OutFile latest.zip
-        Expand-Archive -Force latest.zip /tmp/dalamud
+        $manifest = Invoke-RestMethod -Uri https://raw.githubusercontent.com/dal4kr/Dalamud.Resources/refs/heads/main/Dalamud/VersionInfo.json
+        Invoke-WebRequest -Uri $manifest.downloadUrl -OutFile Release.zip
+        Expand-Archive -Force Release.zip $env:DALAMUD_HOME
+        $hash = (Get-FileHash "$env:DALAMUD_HOME/hashes.json" -Algorithm MD5).Hash
+        if ($hash -ne $manifest.Hash) {
+          throw "Dalamud hashes.json mismatch: manifest $($manifest.Hash), got $hash"
+        }
+        Write-Output "Dalamud $($manifest.AssemblyVersion) for game $($manifest.SupportedGameVer)"
     - name: Build
       run: dotnet build -c release
     - name: Prepare Build Artifact
