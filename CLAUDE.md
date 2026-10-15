@@ -1,60 +1,38 @@
 # IINACT_KR
 
-marzent/IINACT를 포크해서 한국 서버용으로 수정한 프로젝트.
-[fexiv](https://github.com/hareeen/fexiv) (macOS용 FFXIV KR 런처)의 Dalamud 파싱 플러그인으로 사용됨.
-csproj의 `~/.fexiv/resources/dalamud/core/` 경로는 fexiv가 관리하는 Dalamud 설치 위치.
+A fork of marzent/IINACT modified for the Korean FFXIV client.
+It is the parsing plugin used with [fexiv](https://github.com/hareeen/fexiv), a macOS launcher for FFXIV KR.
+The `~/.fexiv/resources/dalamud/core/` path in the csproj files is the Dalamud install that fexiv manages, which is dal4kr's Korean Dalamud.
 
-## 구조
+## Structure
 
-- **IINACT_KR** (이 레포): `origin` = aetherfl0w/IINACT_KR
-- **machina** (서브모듈): aetherfl0w/machina 포크, `dalamud` 브랜치 사용
-    - remote `origin` = ravahn/machina (원본)
-    - remote `marzent` = marzent/machina (포크)
-    - remote `mine` = aetherfl0w/machina (내 포크)
+- **IINACT_KR** (this repo): `origin` = aetherfl0w/IINACT_KR, `upstream` = marzent/IINACT
+- **machina** (submodule): fork at aetherfl0w/machina, branch `dalamud`
+    - remote `origin` = ravahn/machina (original)
+    - remote `marzent` = marzent/machina (Dalamud port)
+    - remote `mine` = aetherfl0w/machina (our fork)
+- **../iinact_kr_dist**: serves the `FFXIV_ACT_Plugin` zip at iinact.hareen.io
 
-## 업스트림 동기화 가이드
+Branches prefixed `u/` track upstream: `u/main` mirrors `upstream/main`, and `u/fix/*` branches carry changes meant for upstream pull requests.
 
-### ravahn/machina가 업데이트된 경우 (주로 opcode)
+## Updating for a new patch
 
-```bash
-cd machina
-git fetch origin
-git merge origin/master
-git push mine dalamud
-cd ..
-git add machina
-git commit -m "chore: update machina submodule"
-git push origin main
-```
+Follow [docs/updating.md](docs/updating.md).
+It covers the machina and upstream merges, the expected conflicts, the release workflow and the ACT plugin distribution.
 
-### marzent/machina가 업데이트된 경우 (dalamud 관련)
+## Korean-specific changes
 
-```bash
-cd machina
-git fetch marzent
-git merge marzent/dalamud
-git push mine dalamud
-cd ..
-git add machina
-git commit -m "chore: update machina submodule"
-git push origin main
-```
+Keep these when resolving conflicts:
 
-### marzent/IINACT (본체)가 업데이트된 경우
+- `IINACT/Plugin.cs`: `GameRegion.Korean` hardcoded with `RegionLocked`, and `ZoneDownHookManager` started after `GetFfxivPlugin()` returns
+- `IINACT/Network/ZoneDownHookManager.cs`: version constants and unscrambler are loaded for the Global region only, everything else uses the dynamic fallback
+- `FetchDependencies/FetchDependencies.cs`: `Region` enum with the Korean download URLs at iinact.hareen.io
+- `machina/Machina.FFXIV/Headers/Opcodes/OpcodeManager.cs`: the `RegionLocked` property
+- `machina/Machina.FFXIV/Headers/Opcodes/Korean.txt` and the `Korean` block of `OverlayPlugin.Core/resources/opcodes.jsonc`: Korean opcodes, taken from ravahn and marzent
+- `.github/workflows/*.yml`, `repo.kr.json`, `.github/release-notices.kr.md`: our release pipeline and plugin registry
 
-```bash
-# upstream remote 추가 (최초 1회)
-git remote add upstream https://github.com/marzent/IINACT
+## Gotchas
 
-git fetch upstream
-git merge upstream/main
-git push origin main
-```
-
-## 한국 서버 관련 주요 변경점
-
-- `Plugin.cs`: GameRegion을 Korean으로 하드코딩 + RegionLocked
-- `machina/Machina.FFXIV/Headers/Opcodes/Korean.txt`: 한국 opcode 값
-- `machina/Machina.FFXIV/Headers/Opcodes/OpcodeManager.cs`: RegionLocked 기능
-- `OverlayPlugin.Core/resources/opcodes.jsonc`: Korean 리전 opcode
-- 충돌 시 Korean 관련 값만 잘 유지하면 됨
+- `gh` resolves this checkout to marzent/IINACT because of the `upstream` remote. Pass `--repo aetherfl0w/IINACT_KR`.
+- Never edit `repo.json`. It is owned by upstream's CI, and `repo.kr.json` is owned by ours.
+- The same `ffxivgame.ver` on the Korean and Global clients does not mean the same opcodes.
