@@ -78,6 +78,8 @@ public sealed class Plugin : IDalamudPlugin
         OpcodeManager.Instance.SetRegion(gameRegion);
         OpcodeManager.Instance.RegionLocked = true;
 
+        var createZoneDownHookManager = Task.Run(()
+            => new ZoneDownHookManager(NotificationManager, GameInteropProvider));
         Version = Assembly.GetExecutingAssembly().GetName().Version!;
 
         FileDialogManager = new FileDialogManager();
@@ -89,11 +91,6 @@ public sealed class Plugin : IDalamudPlugin
                                                     FetchDependencies.Region.Korean, HttpClient);
 
         fetchDeps.GetFfxivPlugin();
-
-        // Installing the zone-down hook suspends every other thread while it patches code.
-        // Under Wine a thread suspended mid file I/O resumes with an invalid handle, so do not start the hook until the ACT plugin is downloaded and patched.
-        var createZoneDownHookManager = Task.Run(()
-            => new ZoneDownHookManager(NotificationManager, GameInteropProvider));
 
         PluginLogTraceListener = new PluginLogTraceListener();
         Trace.Listeners.Add(PluginLogTraceListener);

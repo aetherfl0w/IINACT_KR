@@ -153,5 +153,5 @@ Reload the plugin, hit a striking dummy, then check:
 ## Troubleshooting
 
 - **Overlay is empty but the logs look healthy.** The opcode tables do not match the running build. The network log then holds only memory-based lines such as `261|` and `00|`, with no `21|` or `22|`. Check the Korean tables for the current `ffxivgame.ver`.
-- **Plugin fails to load with `Invalid handle`, `Cannot access a closed file` or `Stream does not support seeking`.** This is the hook-install race under Wine during the plugin download, fixed in `Plugin.cs` by starting `ZoneDownHookManager` after `GetFfxivPlugin()` returns. Make sure a merge did not move it back. Upstream PR: marzent/IINACT#177.
+- **Plugin fails to load with `Invalid handle`, `Cannot access a closed file` or `Stream does not support seeking`.** `MultiSigScanner.SetupCopy` closed its handles with a raw `CloseHandle`, so the GC later closed the same values again while `FetchDependencies` had reused them for the ACT plugin. It is fixed by disposing the SafeHandles with `using`. Make sure a merge did not bring the raw `CloseHandle` back before upstream takes marzent/IINACT#177.
 - **No CI run after a push.** Check that Actions is enabled on the repository and in the organization.

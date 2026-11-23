@@ -24,7 +24,7 @@ It covers the machina and upstream merges, the expected conflicts, the release w
 
 Keep these when resolving conflicts:
 
-- `IINACT/Plugin.cs`: `GameRegion.Korean` hardcoded with `RegionLocked`, and `ZoneDownHookManager` started after `GetFfxivPlugin()` returns
+- `IINACT/Plugin.cs`: `GameRegion.Korean` hardcoded with `RegionLocked`
 - `IINACT/Network/ZoneDownHookManager.cs`: version constants and unscrambler are loaded for the Global region only, everything else uses the dynamic fallback
 - `FetchDependencies/FetchDependencies.cs`: `Region` enum with the Korean download URLs at iinact.hareen.io
 - `machina/Machina.FFXIV/Headers/Opcodes/OpcodeManager.cs`: the `RegionLocked` property
